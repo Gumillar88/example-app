@@ -64,18 +64,22 @@ class TransferController extends Controller
         ];
 
         $transferId = DB::table('transfers')->insertGetId($data);
-        $bank = Bank::find($input['bank_id']);
+        $bank = Bank::find($input['bank_id'])->first();
+        // dd($input);
+        $params = [
+            'account_number'    => $input['account_number'],
+            'amount'            => $input['amount'],
+            'type'              => $input['type'],
+            'bank_code'         => $bank->code,
+            'currency'          => $input['currency'],
+        ];
 
-        $response = $this->bankService->sendMoney(
-            $input['account_number'],
-            $input['amount'],
-            $input['type'] // Prioritaskan tipe transfer dari input, tetapi tentukan tipe terbaik di service
-        );
-
-        if ($response['status'] == 'success') {
+        $response = $this->bankService->sendMoney($params);
+        // dd($response);
+        if (is_array($response) && $response['status'] == 'success') {
             return redirect()->route('transfers.index')->with('success', 'Transfer created and sent successfully!');
+        } else {
+            return redirect()->route('transfers.index')->with('error', 'Transfer failed. Please try again.');
         }
-
-        return redirect()->route('transfers.index')->with('error', 'Transfer created but failed to send.');
     }
 }

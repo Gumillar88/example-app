@@ -7,6 +7,7 @@ class BankService
 {
     public static function sendMoney($transfer)
     {
+        // dd($transfer);
         // Get this time now();
         $currentTime    = Carbon::now()->format('H:i');
         $transferType   = $transfer['type']; // that is type {Inhouse / transfer-online}
@@ -15,13 +16,18 @@ class BankService
         $amount     = $transfer['amount'];
         $currency   = $transfer['currency'];
 
-        // This is a logic when transfering with "type" => transfer-online
-        if ($transferType === 'transfer-online') {
-            // checking time when a transfering
-            return self::handleOnlineTransfer($currentTime, $account, $bankCode, $amount, $currency);
+        // dd($currentTime);
+        if ($transferType == 'transfer-online') {
+            $result = self::handleOnlineTransfer($currentTime, $account, $bankCode, $amount, $currency);
+
+            return [
+                'status' => $result ? 'success' : 'failed'
+            ];
         }
 
-        return true;
+        return [
+            'status' => 'success' // Untuk inhouse transfer yang langsung berhasil
+        ];
     }
 
     private static function handleOnlineTransfer($currentTime, $account, $bankCode, $amount, $currency)
