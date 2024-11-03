@@ -5,18 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Validator;
 use App\Models\Bank;
+use App\Services\BankService;
 use App\Models\Transfer;
 use App\Helpers\AppHelpers;
-
-use App\Services\BankService;
-
 use Illuminate\Support\Facades\DB;
 
 class TransferController extends Controller
 {
-    public function __construct()
+    private $bankService;
+    private $helper;
+
+    public function __construct(BankService $bankService)
     {
-        $this->helper    = new AppHelpers();
+        $this->bankService = $bankService;
+        $this->helper = new AppHelpers();
     }
 
     public function index()
@@ -37,20 +39,18 @@ class TransferController extends Controller
 
     public function store(Request $request)
     {
-        $input = $request->input();
-        
+        $input = $request->all();
+
         $validator = Validator::make($input, [
             'bank_id'           => 'required|exists:banks,id',
             'account_number'    => 'required|string',
-            'type'              => 'required|in:inhouse,online',
+            'type'              => 'required|in:inhouse,transfer-online',
             'currency'          => 'required|in:IDR,USD',
             'amount'            => 'required|numeric',
-            'status'            => 'required|in:pending,completed'
+            'status'            => 'required|in:pending,completed',
         ]);
 
-
-        if ($validator->fails())
-        {
+        if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
@@ -62,15 +62,17 @@ class TransferController extends Controller
             'amount'            => $input['amount'],
             'status'            => $input['status'],
         ];
-        
+
         $transferId = DB::table('transfers')->insertGetId($data);
+        $bank = Bank::find($input['bank_id']);
 
-        $bankCode = DB::table('banks')->where('id', $input['bank_id'])->first();
-        $transfer = array_merge($data, ['id' => $transferId], ['bank_code' => $bankCode->code]);
+        $response = $this->bankService->sendMoney(
+            $input['account_number'],
+            $input['amount'],
+            $input['type'] // Prioritaskan tipe transfer dari input, tetapi tentukan tipe terbaik di service
+        );
 
-        $sendResult = BankService::sendMoney($transfer);
-
-        if ($sendResult) {
+        if ($response['status'] == 'success') {
             return redirect()->route('transfers.index')->with('success', 'Transfer created and sent successfully!');
         }
 

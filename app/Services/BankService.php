@@ -9,14 +9,14 @@ class BankService
     {
         // Get this time now();
         $currentTime    = Carbon::now()->format('H:i');
-        $transferType   = $transfer['type']; // that is type {Inhouse / Online}
+        $transferType   = $transfer['type']; // that is type {Inhouse / transfer-online}
         $account    = $transfer['account_number'];
         $bankCode   = $transfer['bank_code'];
         $amount     = $transfer['amount'];
         $currency   = $transfer['currency'];
 
-        // This is a logic when transfering with "type" => online
-        if ($transferType === 'online') {
+        // This is a logic when transfering with "type" => transfer-online
+        if ($transferType === 'transfer-online') {
             // checking time when a transfering
             return self::handleOnlineTransfer($currentTime, $account, $bankCode, $amount, $currency);
         }

@@ -17,7 +17,7 @@ class CreateTransfersTable extends Migration
             $table->id();
             $table->unsignedBigInteger('bank_id'); // ID bank tujuan
             $table->string('account_number'); // Rekening tujuan
-            $table->enum('type', ['inhouse', 'online']); // Jenis transfer
+            $table->enum('type', ['inhouse', 'transfer-online']); // Jenis transfer
             $table->enum('currency', ['IDR', 'USD']); // Mata uang
             $table->float('amount', 15, 2); // Jumlah transfer
             $table->enum('status', ['pending', 'completed', 'failed'])->default('pending'); // Status transfer

@@ -29,7 +29,7 @@
             <select name="type" id="type" class="form-control" required>
                 <option value="">Choose select</option>
                 <option value="inhouse">Inhouse</option>
-                <option value="online">Online</option>
+                <option value="transfer-online">transfer Online</option>
             </select>
         </div>
 

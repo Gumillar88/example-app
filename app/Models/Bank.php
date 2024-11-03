@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bank extends Model
 {
-    protected $fillable = ['name', 'code'];
+    protected $table = 'banks';
+    protected $fillable = ['name', 'code', 'connection_params'];
 
     public function getTransfers()
     {
@@ -19,5 +20,10 @@ class Bank extends Model
     public static function getAllBanks()
     {
         return DB::table('banks')->get();
+    }
+
+    public function transferRules()
+    {
+        return $this->hasMany(TransferRule::class);
     }
 }
